@@ -17,16 +17,23 @@
 			<p>主播：<span id="youtuberName">未知</span></p>
 		</div>
 
-		<table class="table table-striped" id="timelineMarksTable">
-			<thead>
-				<tr>
-					<th>時間</th>
-					<th>描述</th>
-					<th>操作</th>
-				</tr>
-			</thead>
-			<tbody id="timelineMarks"></tbody>
-		</table>
+		<!-- 新增影片紀錄區域 -->
+		<div id="videoRecords">
+			<h2>影片紀錄</h2>
+			<table class="table table-striped" id="timelineMarksTable">
+				<thead>
+					<tr>
+						<th>時間</th>
+						<th>描述</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody id="timelineMarks">
+					<!-- 動態生成的紀錄行 -->
+				</tbody>
+			</table>
+		</div>
+
 		<div class="input-group mb-3">
 			<button id="markTimeBtn" class="btn btn-primary">標記當前時間</button>
 		</div>
@@ -34,20 +41,23 @@
 			<button id="exportBtn" class="btn btn-secondary">導出記錄</button>
 			<input type="file" id="importInput" accept=".json" style="display: none;">
 			<button id="importBtn" class="btn btn-secondary">導入記錄</button>
+			<button id="exportCurrentLiveBtn" class="btn btn-secondary">導出當前直播 TXT</button>
+			<button id="clearHistoryBtn" class="btn btn-danger">清除歷史資料</button>
 		</div>
-		<!-- 顏色組合選擇 -->
-		<div class="mb-3">
-			<label for="colorSchemeSelect" class="form-label">選擇顏色組合</label>
-			<select id="colorSchemeSelect" class="form-select">
-				<option value="default">預設顏色</option>
-				<option value="dark">深色組合</option>
-				<option value="light">淺色組合</option>
-			</select>
-		</div>
+		<br><br>
 		<!-- 設定按鈕 -->
 		<button id="showSettingsBtn" class="btn btn-secondary mt-3">顯示設定</button>
 		<div id="settings" style="display: none;">
 			<h2>設定</h2>
+			<!-- 顏色組合選擇 -->
+			<div class="mb-3">
+				<label for="colorSchemeSelect" class="form-label">選擇顏色組合</label>
+				<select id="colorSchemeSelect" class="form-select">
+					<option value="default">預設顏色</option>
+					<option value="dark">深色組合</option>
+					<option value="light">淺色組合</option>
+				</select>
+			</div>
 			<div class="mb-3">
 				<label for="buttonColorInput" class="form-label">按鈕顏色</label>
 				<input type="color" id="buttonColorInput" class="form-control">
@@ -61,15 +71,10 @@
 				<input type="range" id="panelOpacityInput" class="form-range" min="0" max="1" step="0.1">
 			</div>
 			<div class="mb-3">
-				<label for="tableTextColorInput" class="form-label">表格文字顏色</label>
-				<input type="color" id="tableTextColorInput" class="form-control">
-			</div>
-			<div class="mb-3">
-				<label for="timeTextColorInput" class="form-label">時間文字顏色</label>
-				<input type="color" id="timeTextColorInput" class="form-control">
+				<label for="bodyTextColorInput" class="form-label">文字顏色</label>
+				<input type="color" id="bodyTextColorInput" class="form-control">
 			</div>
 			<button id="saveSettingsBtn" class="btn btn-primary">保存設定</button>
-
 		</div>
 
 	</div>

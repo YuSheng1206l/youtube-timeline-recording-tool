@@ -20,7 +20,7 @@ body {
 .table th {
 	background-color: #f8f9fa;
 	/* 表格標題背景顏色 */
-	color: #000;
+	color: inherit;
 	/* 表格標題文字顏色 */
 	padding: 10px;
 	/* 表格標題內邊距 */
@@ -33,11 +33,6 @@ body {
 	/* 確保文字顏色繼承 */
 }
 
-.table-striped>tbody>tr:nth-of-type(odd)>* {
-	color: inherit;
-	/* 使奇數行的所有單元格文字顏色繼承自父元素 */
-}
-
 .table-striped>tbody>tr:nth-of-type(even) {
 	background-color: rgba(0, 0, 0, 0.05);
 	/* 偶數行的背景顏色 */
@@ -45,15 +40,10 @@ body {
 	/* 確保文字顏色繼承 */
 }
 
-.table-striped>tbody>tr:nth-of-type(even)>* {
-	color: inherit;
-	/* 使偶數行的所有單元格文字顏色繼承自父元素 */
-}
-
 .table td {
 	padding: 10px;
 	/* 表格單元格內邊距 */
-	color: #000;
+	color: inherit;
 	/* 表格單元格文字顏色 */
 }
 
@@ -61,7 +51,7 @@ body {
 #youtube-timeline-marker {
 	background-color: #ff0000;
 	/* 預設按鈕顏色 */
-	color: #000000;
+	color: inherit;
 	/* 按鈕文字顏色 */
 	border: none;
 	padding: 10px 15px;

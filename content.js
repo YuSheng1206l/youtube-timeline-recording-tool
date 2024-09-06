@@ -20,24 +20,26 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 			panelOpacity
 		});
 		sendResponse({ success: true });
-	} else if (request.action === 'applyTableTextColor') {
-		const tableTextColor = request.color;
-		const timeCells = document.querySelectorAll('#timelineMarksTable td:first-child'); // 選擇所有時間單元格
-		const descriptionCells = document.querySelectorAll('#timelineMarksTable td:nth-child(2)'); // 選擇所有描述單元格
-
-		// 設置時間單元格的顏色
-		timeCells.forEach(cell => {
-			cell.style.color = tableTextColor; // 設置時間文字顏色
-		});
-
-		// 設置描述單元格的顏色
-		descriptionCells.forEach(cell => {
-			cell.style.color = tableTextColor; // 設置描述文字顏色
-		});
-
+	} else if (request.action === 'applyBodyTextColor') {
+		const bodyTextColor = request.color;
+		document.body.style.color = bodyTextColor; // 設置 body 文字顏色
 		sendResponse({ success: true });
+	} else if (request.action === 'updateTimelineMark') {
+		const { tabId, index, description } = request;
+		updateTimelineMark(tabId, index, description, sendResponse);
+		return true; // 保持消息通道開放
 	}
 });
+
+function updateTimelineMark(tabId, index, description, sendResponse) {
+	chrome.storage.local.get('timelineMarks', (result) => {
+		const timelineMarks = result.timelineMarks || {};
+		if (timelineMarks[tabId]) {
+			timelineMarks[tabId][index].description = description; // 更新描述
+			chrome.storage.local.set({ timelineMarks }, sendResponse);
+		}
+	});
+}
 
 // 創建並添加按鈕
 function addButton() {
@@ -128,3 +130,11 @@ function createPanel() {
 
 // 在頁面加載完成後添加按鈕
 window.addEventListener('load', addButton);
+
+function updateDescription(index, newDescription) {
+	chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+		chrome.runtime.sendMessage({ action: "updateTimelineMark", tabId: tabs[0].id, index: parseInt(index), description: newDescription }, function () {
+			loadTimelineMarks(); // 重新加載標記
+		});
+	});
+}

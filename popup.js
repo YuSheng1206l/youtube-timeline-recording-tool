@@ -3,6 +3,62 @@ document.addEventListener('DOMContentLoaded', function () {
 	loadTimelineMarks();
 	loadSettings();
 
+	// 綁定事件監聽器
+	document.getElementById('markTimeBtn').addEventListener('click', markCurrentTime);
+	document.getElementById('exportBtn').addEventListener('click', exportRecords);
+	document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importInput').click());
+	document.getElementById('importInput').addEventListener('change', importRecords);
+	document.getElementById('showSettingsBtn').addEventListener('click', toggleSettings);
+
+	// 新增導出當前直播的事件監聽器
+	document.getElementById('exportCurrentLiveBtn').addEventListener('click', exportCurrentLive);
+
+	// 新增清除歷史資料的事件監聽器
+	document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
+
+	// 顏色組合選擇
+	const colorSchemeSelect = document.getElementById('colorSchemeSelect');
+	if (colorSchemeSelect) {
+		colorSchemeSelect.addEventListener('change', function () {
+			const selectedScheme = this.value;
+			switch (selectedScheme) {
+				case 'default':
+					applyDefaultColors();
+					break;
+				case 'dark':
+					applyDarkColors();
+					break;
+				case 'light':
+					applyLightColors();
+					break;
+			}
+		});
+	}
+
+	// 文字顏色選擇
+	document.getElementById('bodyTextColorInput').addEventListener('input', function () {
+		const bodyTextColor = this.value;
+		document.body.style.color = bodyTextColor; // 即時應用新的 body 文字顏色
+	});
+
+	// 按鈕顏色選擇
+	document.getElementById('buttonColorInput').addEventListener('input', function () {
+		const buttonColor = this.value;
+		document.getElementById('markTimeBtn').style.backgroundColor = buttonColor; // 即時更新按鈕顏色
+	});
+
+	// 視窗顏色選擇
+	document.getElementById('panelColorInput').addEventListener('input', function () {
+		const panelColor = this.value;
+		document.body.style.backgroundColor = panelColor; // 即時更新視窗背景顏色
+	});
+
+	// 視窗透明度選擇
+	document.getElementById('panelOpacityInput').addEventListener('input', function () {
+		const panelOpacity = this.value;
+		document.body.style.opacity = panelOpacity; // 即時更新視窗透明度
+	});
+
 	// 確保按鈕存在後再綁定事件
 	const markTimeBtn = document.getElementById('markTimeBtn');
 	if (markTimeBtn) {
@@ -34,69 +90,6 @@ document.addEventListener('DOMContentLoaded', function () {
 		showSettingsBtn.addEventListener('click', toggleSettings);
 	}
 
-	const colorSchemeSelect = document.getElementById('colorSchemeSelect');
-	if (colorSchemeSelect) {
-		colorSchemeSelect.addEventListener('change', function () {
-			const selectedScheme = this.value;
-			switch (selectedScheme) {
-				case 'default':
-					applyDefaultColors();
-					break;
-				case 'dark':
-					applyDarkColors();
-					break;
-				case 'light':
-					applyLightColors();
-					break;
-			}
-		});
-	}
-
-	const tableTextColorInput = document.getElementById('tableTextColorInput');
-	if (tableTextColorInput) {
-		tableTextColorInput.addEventListener('input', function () {
-			const tableTextColor = this.value;
-
-			// 發送消息給 content.js 來即時應用新的表格文字顏色
-			chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-				chrome.tabs.sendMessage(tabs[0].id, {
-					action: "applyTableTextColor",
-					color: tableTextColor
-				});
-			});
-		});
-	}
-
-	const buttonColorInput = document.getElementById('buttonColorInput');
-	if (buttonColorInput) {
-		buttonColorInput.addEventListener('input', applySettings);
-	}
-
-	const panelColorInput = document.getElementById('panelColorInput');
-	if (panelColorInput) {
-		panelColorInput.addEventListener('input', applySettings);
-	}
-
-	const panelOpacityInput = document.getElementById('panelOpacityInput');
-	if (panelOpacityInput) {
-		panelOpacityInput.addEventListener('input', applySettings);
-	}
-
-	const timeTextColorInput = document.getElementById('timeTextColorInput');
-	if (timeTextColorInput) {
-		timeTextColorInput.addEventListener('input', function () {
-			const timeTextColor = this.value;
-
-			// 發送消息給 content.js 來即時應用新的時間文字顏色
-			chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-				chrome.tabs.sendMessage(tabs[0].id, {
-					action: "applyTimeTextColor",
-					color: timeTextColor
-				});
-			});
-		});
-	}
-
 	let currentMark = null; // 確保在使用之前初始化
 
 	// 定義 applySettings 函數
@@ -104,20 +97,12 @@ document.addEventListener('DOMContentLoaded', function () {
 		const buttonColor = document.getElementById('buttonColorInput').value;
 		const panelColor = document.getElementById('panelColorInput').value;
 		const panelOpacity = document.getElementById('panelOpacityInput').value;
+		const bodyTextColor = document.getElementById('bodyTextColorInput').value;
 
-		// 發送消息給 content.js 來即時應用新的設定
-		chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-			chrome.tabs.sendMessage(tabs[0].id, {
-				action: "applySettings",
-				buttonColor,
-				panelColor,
-				panelOpacity
-			});
-		});
-
-		// 更新 body 的顏色
+		// 更新插件視窗的 body 顏色
 		document.body.style.backgroundColor = panelColor; // 更新 body 背景顏色
-		document.body.style.color = (panelColor === '#ffffff') ? '#000000' : '#ffffff'; // 根據背景顏色調整文字顏色
+		document.body.style.color = bodyTextColor; // 更新 body 文字顏色
+		document.body.style.opacity = panelOpacity; // 更新 body 透明度
 	}
 
 	function updateCurrentStream() {
@@ -143,11 +128,11 @@ document.addEventListener('DOMContentLoaded', function () {
 				if (response) {
 					currentMark = {
 						time: Math.floor(response.currentTime),
-						description: '',
+						description: '', // 這裡不需要清空描述
 						timestamp: new Date().toISOString()
 					};
 					chrome.runtime.sendMessage({ action: "saveTimelineMark", data: currentMark }, function () {
-						loadTimelineMarks();
+						loadTimelineMarks(); // 重新加載標記
 					});
 				}
 			});
@@ -162,9 +147,9 @@ document.addEventListener('DOMContentLoaded', function () {
 				marks.forEach((mark, index) => {
 					const row = document.createElement('tr');
 					row.innerHTML = `
-						<td>${formatTime(mark.time)}</td>
+						<td class="time-cell">${formatTime(mark.time)}</td>
 						<td><input type="text" class="form-control description-input" value="${mark.description}" data-index="${index}"></td>
-						<td><button class="btn btn-sm btn-danger delete-mark" data-index="${index}">刪除</button></td>
+						<td><button class="btn btn-sm btn-danger delete-mark" data-index="${index}">X</button></td>
 					`;
 					marksContainer.appendChild(row);
 				});
@@ -174,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function () {
 					});
 				});
 				document.querySelectorAll('.description-input').forEach(input => {
-					input.addEventListener('change', function () {
+					input.addEventListener('blur', function () { // 使用 blur 事件來保存描述
 						const index = this.getAttribute('data-index');
 						const newDescription = this.value;
 						updateDescription(index, newDescription);
@@ -187,6 +172,14 @@ document.addEventListener('DOMContentLoaded', function () {
 	function deleteMark(index) {
 		chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
 			chrome.runtime.sendMessage({ action: "deleteTimelineMark", tabId: tabs[0].id, index: parseInt(index) }, function () {
+				loadTimelineMarks();
+			});
+		});
+	}
+
+	function updateDescription(index, newDescription) {
+		chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+			chrome.runtime.sendMessage({ action: "updateTimelineMark", tabId: tabs[0].id, index: parseInt(index), description: newDescription }, function () {
 				loadTimelineMarks();
 			});
 		});
@@ -230,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	}
 
 	function loadSettings() {
-		chrome.storage.local.get(['buttonColor', 'panelColor', 'panelOpacity'], function (result) {
+		chrome.storage.local.get(['buttonColor', 'panelColor', 'panelOpacity', 'bodyTextColor'], function (result) {
 			if (result.buttonColor) {
 				document.getElementById('buttonColorInput').value = result.buttonColor;
 			}
@@ -240,6 +233,9 @@ document.addEventListener('DOMContentLoaded', function () {
 			if (result.panelOpacity) {
 				document.getElementById('panelOpacityInput').value = result.panelOpacity;
 			}
+			if (result.bodyTextColor) {
+				document.getElementById('bodyTextColorInput').value = result.bodyTextColor;
+			}
 		});
 	}
 
@@ -247,15 +243,15 @@ document.addEventListener('DOMContentLoaded', function () {
 		const buttonColor = document.getElementById('buttonColorInput').value;
 		const panelColor = document.getElementById('panelColorInput').value;
 		const panelOpacity = document.getElementById('panelOpacityInput').value;
+		const bodyTextColor = document.getElementById('bodyTextColorInput').value;
 
 		chrome.storage.local.set({
 			buttonColor,
 			panelColor,
-			panelOpacity
+			panelOpacity,
+			bodyTextColor
 		}, function () {
-			chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-				chrome.tabs.sendMessage(tabs[0].id, { action: "applySettings" });
-			});
+			applySettings(); // 即時應用設定
 		});
 	}
 
@@ -263,22 +259,66 @@ document.addEventListener('DOMContentLoaded', function () {
 		const settingsDiv = document.getElementById('settings');
 		settingsDiv.style.display = settingsDiv.style.display === 'none' ? 'block' : 'none';
 	}
-
-	function applyDefaultColors() {
-		document.getElementById('buttonColorInput').value = '#007bff';
-		document.getElementById('panelColorInput').value = '#ffffff';
-		applySettings();
-	}
-
-	function applyDarkColors() {
-		document.getElementById('buttonColorInput').value = '#ffffff';
-		document.getElementById('panelColorInput').value = '#333333';
-		applySettings();
-	}
-
-	function applyLightColors() {
-		document.getElementById('buttonColorInput').value = '#000000';
-		document.getElementById('panelColorInput').value = '#f8f9fa';
-		applySettings();
-	}
 });
+
+// 定義 applySettings 函數
+function applySettings() {
+	const buttonColor = document.getElementById('buttonColorInput').value;
+	const panelColor = document.getElementById('panelColorInput').value;
+	const panelOpacity = document.getElementById('panelOpacityInput').value;
+	const bodyTextColor = document.getElementById('bodyTextColorInput').value;
+
+	// 更新插件視窗的 body 顏色
+	document.body.style.backgroundColor = panelColor; // 更新 body 背景顏色
+	document.body.style.color = bodyTextColor; // 更新 body 文字顏色
+	document.body.style.opacity = panelOpacity; // 更新 body 透明度
+}
+
+function applyDefaultColors() {
+	document.getElementById('buttonColorInput').value = '#007bff'; // 預設按鈕顏色
+	document.getElementById('panelColorInput').value = '#ffffff'; // 預設面板顏色
+	document.getElementById('bodyTextColorInput').value = '#000000'; // 預設文字顏色
+	applySettings(); // 應用設定
+}
+
+function applyDarkColors() {
+	document.getElementById('buttonColorInput').value = '#ffffff'; // 深色按鈕顏色
+	document.getElementById('panelColorInput').value = '#333333'; // 深色面板顏色
+	document.getElementById('bodyTextColorInput').value = '#ffffff'; // 深色文字顏色
+	applySettings(); // 應用設定
+}
+
+function applyLightColors() {
+	document.getElementById('buttonColorInput').value = '#000000'; // 淺色按鈕顏色
+	document.getElementById('panelColorInput').value = '#f8f9fa'; // 淺色面板顏色
+	document.getElementById('bodyTextColorInput').value = '#000000'; // 淺色文字顏色
+	applySettings(); // 應用設定
+}
+
+// 導出當前直播的 TXT 文件
+function exportCurrentLive() {
+	chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+		chrome.tabs.sendMessage(tabs[0].id, { action: "getStreamInfo" }, function (response) {
+			if (response) {
+				const liveInfo = `當前直播：${response.streamTitle}\n主播：${response.youtuberName}`;
+				const blob = new Blob([liveInfo], { type: 'text/plain' });
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.href = url;
+				a.download = 'current_live_info.txt';
+				document.body.appendChild(a);
+				a.click();
+				document.body.removeChild(a);
+				URL.revokeObjectURL(url);
+			}
+		});
+	});
+}
+
+// 清除歷史資料
+function clearHistory() {
+	chrome.storage.local.set({ timelineMarks: {} }, function () {
+		alert('歷史資料已清除！');
+		loadTimelineMarks(); // 重新加載標記
+	});
+}
