@@ -1,11 +1,12 @@
 // 監聽來自 popup 或 background 的消息
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 	if (request.action === 'getCurrentTime') {
-		const videoElement = document.querySelector('video');
-		if (videoElement) {
-			sendResponse({ currentTime: Math.floor(videoElement.currentTime) }); // 確保時間是整數秒
+		const progressBar = document.querySelector('.ytp-progress-bar');
+		if (progressBar) {
+			const currentTime = parseInt(progressBar.getAttribute('aria-valuenow'), 10); // 獲取當前時間（秒）
+			sendResponse({ currentTime: currentTime });
 		} else {
-			sendResponse({ currentTime: 0 }); // 如果沒有視頻元素，返回0
+			sendResponse({ currentTime: 0 }); // 如果沒有進度條，返回0
 		}
 	} else if (request.action === 'getStreamInfo') {
 		const youtuberName = document.querySelector('yt-formatted-string.style-scope.ytd-channel-name a')?.textContent.trim() || '未知';
@@ -34,13 +35,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 			cell.style.color = tableTextColor; // 設置描述文字顏色
 		});
 
-		sendResponse({ success: true });
-	} else if (request.action === 'applyTimeTextColor') {
-		const timeTextColor = request.color;
-		const timeCells = document.querySelectorAll('#timelineMarksTable td:first-child'); // 選擇所有時間單元格
-		timeCells.forEach(cell => {
-			cell.style.color = timeTextColor; // 設置時間文字顏色
-		});
 		sendResponse({ success: true });
 	}
 });
@@ -114,7 +108,7 @@ function createPanel() {
 	panel.style.right = '20px';
 	panel.style.width = '400px';
 	panel.style.height = '600px';
-	panel.style.backgroundColor = '#fff';
+	panel.style.backgroundColor = '#fff'; // 預設背景顏色
 	panel.style.border = '1px solid #ccc';
 	panel.style.borderRadius = '10px';
 	panel.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';

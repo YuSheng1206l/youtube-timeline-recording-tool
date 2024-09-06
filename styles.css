@@ -11,23 +11,50 @@ body {
 
 /* 表格樣式 */
 .table {
+	width: 100%;
+	/* 使表格寬度為100% */
 	color: inherit;
 	/* 使表格文字顏色繼承自父元素 */
 }
 
-.table-striped tbody tr:nth-of-type(odd) {
+.table th {
+	background-color: #f8f9fa;
+	/* 表格標題背景顏色 */
+	color: #000;
+	/* 表格標題文字顏色 */
+	padding: 10px;
+	/* 表格標題內邊距 */
+}
+
+.table-striped>tbody>tr:nth-of-type(odd) {
 	background-color: rgba(255, 255, 255, 0.05);
 	/* 表格條紋顏色 */
+	color: inherit;
+	/* 確保文字顏色繼承 */
 }
 
-.table-striped tbody tr:nth-of-type(even) {
+.table-striped>tbody>tr:nth-of-type(odd)>* {
+	color: inherit;
+	/* 使奇數行的所有單元格文字顏色繼承自父元素 */
+}
+
+.table-striped>tbody>tr:nth-of-type(even) {
 	background-color: rgba(0, 0, 0, 0.05);
 	/* 偶數行的背景顏色 */
+	color: inherit;
+	/* 確保文字顏色繼承 */
 }
 
-.table-striped tbody td {
+.table-striped>tbody>tr:nth-of-type(even)>* {
 	color: inherit;
-	/* 使表格單元格文字顏色繼承自父元素 */
+	/* 使偶數行的所有單元格文字顏色繼承自父元素 */
+}
+
+.table td {
+	padding: 10px;
+	/* 表格單元格內邊距 */
+	color: #000;
+	/* 表格單元格文字顏色 */
 }
 
 /* 按鈕樣式 */
@@ -48,6 +75,26 @@ body {
 	/* 按鈕懸停顏色 */
 }
 
+/* 淺色模式樣式 */
+.light-mode {
+	background-color: #ffffff;
+	/* 淺色模式背景顏色 */
+	color: #000000;
+	/* 淺色模式文字顏色 */
+}
+
+.light-mode .table th {
+	background-color: #f8f9fa;
+	/* 淺色模式表格標題背景顏色 */
+	color: #000;
+	/* 淺色模式表格標題文字顏色 */
+}
+
+.light-mode .table td {
+	color: #000;
+	/* 淺色模式表格單元格文字顏色 */
+}
+
 /* 夜間模式樣式 */
 .dark-mode {
 	background-color: #333;
@@ -56,40 +103,26 @@ body {
 	/* 夜間模式文字顏色 */
 }
 
-.dark-mode .table {
+.dark-mode .table th {
+	background-color: #444;
+	/* 夜間模式表格標題背景顏色 */
 	color: #fff;
-	/* 夜間模式表格文字顏色 */
+	/* 夜間模式表格標題文字顏色 */
 }
 
-.dark-mode .table-striped tbody tr:nth-of-type(odd) {
+.dark-mode .table td {
+	color: #fff;
+	/* 夜間模式表格單元格文字顏色 */
+}
+
+.dark-mode .table-striped>tbody>tr:nth-of-type(odd) {
 	background-color: rgba(255, 255, 255, 0.1);
 	/* 夜間模式條紋顏色 */
 }
 
-.dark-mode .table-striped tbody tr:nth-of-type(even) {
+.dark-mode .table-striped>tbody>tr:nth-of-type(even) {
 	background-color: rgba(255, 255, 255, 0.05);
 	/* 夜間模式偶數行顏色 */
-}
-
-.dark-mode .btn-primary {
-	background-color: #007bff;
-	/* 夜間模式主要按鈕顏色 */
-	border-color: #007bff;
-}
-
-.dark-mode .btn-secondary {
-	background-color: #6c757d;
-	/* 夜間模式次要按鈕顏色 */
-	border-color: #6c757d;
-}
-
-.dark-mode input[type="text"] {
-	background-color: #444;
-	/* 夜間模式輸入框背景顏色 */
-	color: #fff;
-	/* 夜間模式輸入框文字顏色 */
-	border-color: #555;
-	/* 夜間模式輸入框邊框顏色 */
 }
 
 /* 添加其他自定義樣式 */
