@@ -1,0 +1,95 @@
+/* 基本樣式 */
+body {
+	width: 400px;
+	padding: 15px;
+	font-family: 新細明體, sans-serif;
+	background-color: #ffffff;
+	/* 預設背景顏色 */
+	color: #000000;
+	/* 預設文字顏色 */
+}
+
+/* 表格樣式 */
+.table {
+	color: inherit;
+	/* 使表格文字顏色繼承自父元素 */
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+	background-color: rgba(255, 255, 255, 0.05);
+	/* 表格條紋顏色 */
+}
+
+.table-striped tbody tr:nth-of-type(even) {
+	background-color: rgba(0, 0, 0, 0.05);
+	/* 偶數行的背景顏色 */
+}
+
+.table-striped tbody td {
+	color: inherit;
+	/* 使表格單元格文字顏色繼承自父元素 */
+}
+
+/* 按鈕樣式 */
+#youtube-timeline-marker {
+	background-color: #ff0000;
+	/* 預設按鈕顏色 */
+	color: #000000;
+	/* 按鈕文字顏色 */
+	border: none;
+	padding: 10px 15px;
+	border-radius: 50%;
+	cursor: pointer;
+	background-size: cover;
+}
+
+#youtube-timeline-marker:hover {
+	background-color: #cc0000;
+	/* 按鈕懸停顏色 */
+}
+
+/* 夜間模式樣式 */
+.dark-mode {
+	background-color: #333;
+	/* 夜間模式背景顏色 */
+	color: #fff;
+	/* 夜間模式文字顏色 */
+}
+
+.dark-mode .table {
+	color: #fff;
+	/* 夜間模式表格文字顏色 */
+}
+
+.dark-mode .table-striped tbody tr:nth-of-type(odd) {
+	background-color: rgba(255, 255, 255, 0.1);
+	/* 夜間模式條紋顏色 */
+}
+
+.dark-mode .table-striped tbody tr:nth-of-type(even) {
+	background-color: rgba(255, 255, 255, 0.05);
+	/* 夜間模式偶數行顏色 */
+}
+
+.dark-mode .btn-primary {
+	background-color: #007bff;
+	/* 夜間模式主要按鈕顏色 */
+	border-color: #007bff;
+}
+
+.dark-mode .btn-secondary {
+	background-color: #6c757d;
+	/* 夜間模式次要按鈕顏色 */
+	border-color: #6c757d;
+}
+
+.dark-mode input[type="text"] {
+	background-color: #444;
+	/* 夜間模式輸入框背景顏色 */
+	color: #fff;
+	/* 夜間模式輸入框文字顏色 */
+	border-color: #555;
+	/* 夜間模式輸入框邊框顏色 */
+}
+
+/* 添加其他自定義樣式 */

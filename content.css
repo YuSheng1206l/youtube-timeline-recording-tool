@@ -1,0 +1,13 @@
+#youtube-timeline-marker {
+	background-color: #ff0000;
+	color: #ffffff;
+	border: none;
+	padding: 10px 15px;
+	border-radius: 50%;
+	cursor: pointer;
+	background-size: cover;
+}
+
+#youtube-timeline-marker:hover {
+	background-color: #cc0000;
+}
