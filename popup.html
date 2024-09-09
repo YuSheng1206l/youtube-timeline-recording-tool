@@ -5,24 +5,30 @@
 	<meta charset="UTF-8">
 	<title>YouTube 直播時間軸標記</title>
 	<link rel="stylesheet" href="popup.css">
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
 </head>
 
 <body>
 	<div id="app">
 		<h1>YouTube 直播時間軸標記</h1>
 		<div id="videoInfo"></div>
-		<button id="markTimeButton">標記當前時間</button>
-		<input type="text" id="descriptionInput" placeholder="添加描述...">
+		<div class="input-group">
+			<input type="text" id="descriptionInput" placeholder="添加描述...">
+			<button id="markTimeButton">標記時間</button>
+		</div>
 		<div id="markedTimesList"></div>
-		<button id="exportTxtButton">導出TXT</button>
-		<button id="settingsButton">設置</button>
+		<div class="button-group">
+			<button id="exportTxtButton">導出TXT</button>
+			<button id="settingsButton">設置</button>
+		</div>
 	</div>
 	<div id="settingsPanel" style="display: none;">
 		<h2>設置</h2>
 		<button id="exportButton">導出JSON</button>
-		<button id="importButton">導入記錄</button>
+		<button id="importButton">導入JSON</button>
 		<input type="file" id="importInput" accept=".json" style="display: none;">
 		<button id="toggleThemeButton">切換主題</button>
+		<button id="clearHistoryButton">清除歷史記錄</button>
 		<button id="backToMainButton">返回主界面</button>
 	</div>
 	<script src="popup.js"></script>

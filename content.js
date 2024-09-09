@@ -71,7 +71,7 @@ function createButton() {
 	popup.style.position = 'fixed';
 	popup.style.bottom = '80px';
 	popup.style.right = '20px';
-	popup.style.width = '300px';
+	popup.style.width = '650px';
 	popup.style.height = '400px';
 	popup.style.border = 'none';
 	popup.style.zIndex = '10000';

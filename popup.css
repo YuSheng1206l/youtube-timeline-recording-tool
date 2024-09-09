@@ -1,112 +1,230 @@
+:root {
+	--primary-color: #3498db;
+	--secondary-color: #2ecc71;
+	--background-color: #f0f3f6;
+	--text-color: #34495e;
+	--border-color: #bdc3c7;
+	--delete-color: #e74c3c;
+}
+
 body {
-	width: 500px;
-	height: 600px;
-	font-family: Arial, sans-serif;
+	width: 600px;
+	/* 調整寬度 */
+	height: 500px;
+	/* 調整高度 */
+	font-family: 'Roboto', sans-serif;
 	padding: 15px;
-	transition: background-color 0.3s, color 0.3s;
-	background-color: white;
-	overflow-y: auto;
+	/* 調整內邊距 */
+	background-color: var(--background-color);
+	color: var(--text-color);
+	display: flex;
+	flex-direction: column;
+	margin: 0;
 }
 
 .dark-mode {
-	background-color: #333;
-	color: #fff;
+	--primary-color: #3498db;
+	--secondary-color: #2ecc71;
+	--background-color: #2c3e50;
+	--text-color: #ecf0f1;
+	--border-color: #7f8c8d;
+	--delete-color: #c0392b;
 }
 
-h1 {
-	font-size: 18px;
-	margin-bottom: 10px;
+h1,
+h2 {
+	font-weight: 500;
+	margin-bottom: 20px;
+	text-align: center;
+	color: var(--primary-color);
+}
+
+h3 {
+	font-weight: 500;
+	margin-bottom: 20px;
+	text-align: center;
+	color: var(--primary-color);
 }
 
 button {
-	margin: 5px 0;
-	padding: 5px 10px;
+	background-color: var(--primary-color);
+	color: white;
+	border: none;
+	padding: 8px 12px;
+	/* 調整按鈕內邊距 */
+	border-radius: 20px;
+	/* 調整圓角 */
 	cursor: pointer;
+	transition: all 0.3s ease;
+	font-weight: 500;
+	font-size: 14px;
+	/* 調整字體大小 */
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+button:hover {
+	background-color: var(--secondary-color);
+	transform: translateY(-2px);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 input[type="text"] {
 	width: 100%;
-	padding: 5px;
-	margin-bottom: 10px;
+	padding: 8px;
+	/* 調整內邊距 */
+	border: 1px solid var(--border-color);
+	border-radius: 20px;
+	/* 調整圓角 */
+	font-size: 14px;
+	/* 調整字體大小 */
+	transition: all 0.3s ease;
+}
+
+input[type="text"]:focus {
+	outline: none;
+	border-color: var(--primary-color);
+	box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+#app {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+#videoInfo {
+	background-color: white;
+	padding: 15px;
+	border-radius: 10px;
+	margin-bottom: 20px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+#videoInfo h2 {
+	font-size: 16px;
+	margin: 0 0 10px 0;
+	color: var(--primary-color);
+}
+
+#videoInfo p {
+	font-size: 14px;
+	margin: 0;
+	color: var(--text-color);
+}
+
+.input-group {
+	display: flex;
+	margin-bottom: 20px;
+}
+
+.input-group input {
+	flex-grow: 1;
+	margin-right: 10px;
 }
 
 #markedTimesList {
-	max-height: 400px;
+	flex-grow: 1;
 	overflow-y: auto;
 	margin-bottom: 15px;
+	border: 1px solid var(--border-color);
+	border-radius: 10px;
+	/* 調整圓角 */
+	padding: 10px;
+	/* 調整內邊距 */
+	background-color: white;
 }
 
 #markedTimesList div {
 	display: flex;
 	align-items: center;
 	margin-bottom: 10px;
-	padding: 5px;
-	background-color: #f0f0f0;
-	border-radius: 3px;
+	padding: 10px;
+	background-color: var(--background-color);
+	border-radius: 8px;
+	transition: all 0.3s ease;
+}
+
+#markedTimesList div:hover {
+	transform: translateX(5px);
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .time {
 	width: 80px;
 	font-weight: bold;
+	color: var(--primary-color);
+	font-size: 14px;
 }
 
 .description {
 	flex-grow: 1;
 	margin: 0 10px;
-	padding: 3px;
+	padding: 5px;
+	border: none;
+	background-color: transparent;
+	font-size: 14px;
+	color: var(--text-color);
 }
 
 .deleteButton {
-	background-color: #ff4444;
+	background-color: var(--delete-color);
 	color: white;
 	border: none;
-	padding: 3px 8px;
-	border-radius: 3px;
+	padding: 5px 10px;
+	border-radius: 15px;
 	cursor: pointer;
+	font-size: 12px;
+	transition: all 0.3s ease;
 }
 
 .deleteButton:hover {
-	background-color: #cc0000;
+	background-color: #c0392b;
 }
 
-.editButton,
-.deleteButton {
-	margin-left: 5px;
-	font-size: 12px;
+.button-group {
+	display: flex;
+	justify-content: space-between;
 }
 
-/* 在文件末尾添加以下樣式 */
-.video-info {
-	margin-bottom: 15px;
-	padding: 10px;
-	background-color: #f0f0f0;
-	border-radius: 5px;
+#settingsPanel {
+	background-color: white;
+	padding: 15px;
+	/* 調整內邊距 */
+	border-radius: 10px;
+	/* 調整圓角 */
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.video-info h2 {
-	font-size: 16px;
-	margin: 0 0 5px 0;
+#settingsPanel button {
+	display: block;
+	width: 100%;
+	margin-bottom: 10px;
+	padding: 8px;
 }
 
-.video-info p {
-	font-size: 14px;
-	margin: 0;
-	color: #666;
+#clearHistoryButton {
+	background-color: var(--delete-color);
+	margin-left: 10px;
 }
 
-.dark-mode .video-info {
-	background-color: #444;
+#clearHistoryButton:hover {
+	background-color: #c0392b;
 }
 
-.dark-mode .video-info h2 {
-	color: #fff;
+/* Scrollbar styles */
+::-webkit-scrollbar {
+	width: 8px;
 }
 
-.dark-mode .video-info p {
-	color: #ccc;
+::-webkit-scrollbar-track {
+	background: var(--background-color);
 }
 
-/* 在適當的位置添加以下樣式 */
-#exportTxtButton {
-	margin-right: 10px;
+::-webkit-scrollbar-thumb {
+	background: var(--primary-color);
+	border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: var(--secondary-color);
 }

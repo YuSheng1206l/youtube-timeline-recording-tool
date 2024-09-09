@@ -25,15 +25,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
 				// 從 content script 獲取視頻信息
 				chrome.tabs.sendMessage(currentTabId, { action: "getVideoInfo" }, function (response) {
-					if (response && response.title) {
+					if (response && response.title && response.channelName && response.channelUrl) {
 						currentVideoInfo = response;
 						updateVideoInfo();
 						updateMarkedTimesList();
 					} else {
+						console.log('Failed to get video info:', response);
 						// 如果獲取失敗，5秒後重試
 						setTimeout(getVideoInfo, 5000);
 					}
 				});
+			} else {
+				console.log('Failed to get current tab info:', response);
 			}
 		});
 	}
@@ -43,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	function updateVideoInfo() {
 		videoInfo.innerHTML = `
       <h2>${currentVideoInfo.title}</h2>
-      <p>直播主：${currentVideoInfo.channelName} (ID: ${currentVideoInfo.channelId})</p>
+      <h3>直播主：${currentVideoInfo.channelName} (ID: ${currentVideoInfo.channelId})</p>
     `;
 	}
 
@@ -72,13 +75,23 @@ document.addEventListener('DOMContentLoaded', function () {
 				result.timeMarkers[currentVideoInfo.channelUrl][currentVideoInfo.channelName] = {};
 			}
 			if (!result.timeMarkers[currentVideoInfo.channelUrl][currentVideoInfo.channelName][currentVideoInfo.title]) {
-				result.timeMarkers[currentVideoInfo.channelUrl][currentVideoInfo.channelName][currentVideoInfo.title] = [];
+				result.timeMarkers[currentVideoInfo.channelUrl][currentVideoInfo.channelName][currentVideoInfo.title] = {
+					url: window.location.href,
+					markers: []
+				};
 			}
-			result.timeMarkers[currentVideoInfo.channelUrl][currentVideoInfo.channelName][currentVideoInfo.title].push({
+
+			// 確保 markers 數組存在
+			if (!Array.isArray(result.timeMarkers[currentVideoInfo.channelUrl][currentVideoInfo.channelName][currentVideoInfo.title].markers)) {
+				result.timeMarkers[currentVideoInfo.channelUrl][currentVideoInfo.channelName][currentVideoInfo.title].markers = [];
+			}
+
+			result.timeMarkers[currentVideoInfo.channelUrl][currentVideoInfo.channelName][currentVideoInfo.title].markers.push({
 				formattedTime: formattedTime,
 				description: description,
 				timestamp: timestamp
 			});
+
 			chrome.storage.local.set({ timeMarkers: result.timeMarkers }, function () {
 				console.log('Time marker saved');
 				updateMarkedTimesList();
@@ -89,18 +102,22 @@ document.addEventListener('DOMContentLoaded', function () {
 	// 更新標記列表
 	function updateMarkedTimesList() {
 		chrome.storage.local.get({ timeMarkers: {} }, function (result) {
-			const markers = result.timeMarkers[currentVideoInfo.channelUrl]?.[currentVideoInfo.channelName]?.[currentVideoInfo.title] || [];
+			const markers = result.timeMarkers[currentVideoInfo.channelUrl]?.[currentVideoInfo.channelName]?.[currentVideoInfo.title]?.markers || [];
 			markedTimesList.innerHTML = '';
 
-			markers.forEach((marker, index) => {
-				const markerElement = document.createElement('div');
-				markerElement.innerHTML = `
+			if (markers.length === 0) {
+				markedTimesList.innerHTML = '<p>暫無標記</p>';
+			} else {
+				markers.forEach((marker, index) => {
+					const markerElement = document.createElement('div');
+					markerElement.innerHTML = `
           <span class="time">${marker.formattedTime}</span>
           <input type="text" class="description" value="${marker.description}" data-index="${index}">
           <button class="deleteButton" data-index="${index}">刪除</button>
         `;
-				markedTimesList.appendChild(markerElement);
-			});
+					markedTimesList.appendChild(markerElement);
+				});
+			}
 			addMarkerListeners();
 
 			markedTimesList.scrollTop = markedTimesList.scrollHeight;
@@ -130,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	// 編輯標記
 	function editMarker(index, newDescription) {
 		chrome.storage.local.get({ timeMarkers: {} }, function (result) {
-			const markers = result.timeMarkers[currentVideoInfo.channelUrl][currentVideoInfo.channelName][currentVideoInfo.title];
+			const markers = result.timeMarkers[currentVideoInfo.channelUrl][currentVideoInfo.channelName][currentVideoInfo.title].markers;
 			markers[index].description = newDescription;
 			chrome.storage.local.set({ timeMarkers: result.timeMarkers }, function () {
 				updateMarkedTimesList();
@@ -142,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	function deleteMarker(index) {
 		if (confirm("確定要刪除這個標記嗎？")) {
 			chrome.storage.local.get({ timeMarkers: {} }, function (result) {
-				result.timeMarkers[currentVideoInfo.channelUrl][currentVideoInfo.channelName][currentVideoInfo.title].splice(index, 1);
+				result.timeMarkers[currentVideoInfo.channelUrl][currentVideoInfo.channelName][currentVideoInfo.title].markers.splice(index, 1);
 				chrome.storage.local.set({ timeMarkers: result.timeMarkers }, function () {
 					updateMarkedTimesList();
 				});
@@ -223,7 +240,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			for (const title in channelMarkers) {
 				txtContent += title + '\n';
-				channelMarkers[title].forEach(marker => {
+				txtContent += `URL: ${channelMarkers[title].url}\n`;
+				channelMarkers[title].markers.forEach(marker => {
 					txtContent += `\t${marker.formattedTime} - ${marker.description}\n`;
 				});
 				txtContent += '\n';
@@ -237,5 +255,17 @@ document.addEventListener('DOMContentLoaded', function () {
 			link.click();
 			URL.revokeObjectURL(url);
 		});
+	});
+
+	// 清除歷史記錄
+	const clearHistoryButton = document.getElementById('clearHistoryButton');
+
+	clearHistoryButton.addEventListener('click', function () {
+		if (confirm("確定要清除所有歷史記錄嗎？此操作不可撤銷。")) {
+			chrome.storage.local.set({ timeMarkers: {} }, function () {
+				console.log('All history cleared');
+				updateMarkedTimesList();
+			});
+		}
 	});
 });
