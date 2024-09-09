@@ -1,0 +1,112 @@
+body {
+	width: 500px;
+	height: 600px;
+	font-family: Arial, sans-serif;
+	padding: 15px;
+	transition: background-color 0.3s, color 0.3s;
+	background-color: white;
+	overflow-y: auto;
+}
+
+.dark-mode {
+	background-color: #333;
+	color: #fff;
+}
+
+h1 {
+	font-size: 18px;
+	margin-bottom: 10px;
+}
+
+button {
+	margin: 5px 0;
+	padding: 5px 10px;
+	cursor: pointer;
+}
+
+input[type="text"] {
+	width: 100%;
+	padding: 5px;
+	margin-bottom: 10px;
+}
+
+#markedTimesList {
+	max-height: 400px;
+	overflow-y: auto;
+	margin-bottom: 15px;
+}
+
+#markedTimesList div {
+	display: flex;
+	align-items: center;
+	margin-bottom: 10px;
+	padding: 5px;
+	background-color: #f0f0f0;
+	border-radius: 3px;
+}
+
+.time {
+	width: 80px;
+	font-weight: bold;
+}
+
+.description {
+	flex-grow: 1;
+	margin: 0 10px;
+	padding: 3px;
+}
+
+.deleteButton {
+	background-color: #ff4444;
+	color: white;
+	border: none;
+	padding: 3px 8px;
+	border-radius: 3px;
+	cursor: pointer;
+}
+
+.deleteButton:hover {
+	background-color: #cc0000;
+}
+
+.editButton,
+.deleteButton {
+	margin-left: 5px;
+	font-size: 12px;
+}
+
+/* 在文件末尾添加以下樣式 */
+.video-info {
+	margin-bottom: 15px;
+	padding: 10px;
+	background-color: #f0f0f0;
+	border-radius: 5px;
+}
+
+.video-info h2 {
+	font-size: 16px;
+	margin: 0 0 5px 0;
+}
+
+.video-info p {
+	font-size: 14px;
+	margin: 0;
+	color: #666;
+}
+
+.dark-mode .video-info {
+	background-color: #444;
+}
+
+.dark-mode .video-info h2 {
+	color: #fff;
+}
+
+.dark-mode .video-info p {
+	color: #ccc;
+}
+
+/* 在適當的位置添加以下樣式 */
+#exportTxtButton {
+	margin-right: 10px;
+}

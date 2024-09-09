@@ -1,324 +1,241 @@
 document.addEventListener('DOMContentLoaded', function () {
-	updateCurrentStream();
-	loadTimelineMarks();
-	loadSettings();
-
-	// 綁定事件監聽器
-	document.getElementById('markTimeBtn').addEventListener('click', markCurrentTime);
-	document.getElementById('exportBtn').addEventListener('click', exportRecords);
-	document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importInput').click());
-	document.getElementById('importInput').addEventListener('change', importRecords);
-	document.getElementById('showSettingsBtn').addEventListener('click', toggleSettings);
-
-	// 新增導出當前直播的事件監聽器
-	document.getElementById('exportCurrentLiveBtn').addEventListener('click', exportCurrentLive);
-
-	// 新增清除歷史資料的事件監聽器
-	document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
-
-	// 顏色組合選擇
-	const colorSchemeSelect = document.getElementById('colorSchemeSelect');
-	if (colorSchemeSelect) {
-		colorSchemeSelect.addEventListener('change', function () {
-			const selectedScheme = this.value;
-			switch (selectedScheme) {
-				case 'default':
-					applyDefaultColors();
-					break;
-				case 'dark':
-					applyDarkColors();
-					break;
-				case 'light':
-					applyLightColors();
-					break;
-			}
-		});
-	}
-
-	// 文字顏色選擇
-	document.getElementById('bodyTextColorInput').addEventListener('input', function () {
-		const bodyTextColor = this.value;
-		document.body.style.color = bodyTextColor; // 即時應用新的 body 文字顏色
-	});
-
-	// 按鈕顏色選擇
-	document.getElementById('buttonColorInput').addEventListener('input', function () {
-		const buttonColor = this.value;
-		document.getElementById('markTimeBtn').style.backgroundColor = buttonColor; // 即時更新按鈕顏色
-	});
-
-	// 視窗顏色選擇
-	document.getElementById('panelColorInput').addEventListener('input', function () {
-		const panelColor = this.value;
-		document.body.style.backgroundColor = panelColor; // 即時更新視窗背景顏色
-	});
-
-	// 視窗透明度選擇
-	document.getElementById('panelOpacityInput').addEventListener('input', function () {
-		const panelOpacity = this.value;
-		document.body.style.opacity = panelOpacity; // 即時更新視窗透明度
-	});
-
-	// 確保按鈕存在後再綁定事件
-	const markTimeBtn = document.getElementById('markTimeBtn');
-	if (markTimeBtn) {
-		markTimeBtn.addEventListener('click', markCurrentTime);
-	}
-
-	const exportBtn = document.getElementById('exportBtn');
-	if (exportBtn) {
-		exportBtn.addEventListener('click', exportRecords);
-	}
-
-	const importBtn = document.getElementById('importBtn');
-	if (importBtn) {
-		importBtn.addEventListener('click', () => document.getElementById('importInput').click());
-	}
-
+	const markTimeButton = document.getElementById('markTimeButton');
+	const descriptionInput = document.getElementById('descriptionInput');
+	const markedTimesList = document.getElementById('markedTimesList');
+	const videoInfo = document.getElementById('videoInfo');
+	const settingsButton = document.getElementById('settingsButton');
+	const settingsPanel = document.getElementById('settingsPanel');
+	const exportButton = document.getElementById('exportButton');
+	const importButton = document.getElementById('importButton');
 	const importInput = document.getElementById('importInput');
-	if (importInput) {
-		importInput.addEventListener('change', importRecords);
-	}
+	const toggleThemeButton = document.getElementById('toggleThemeButton');
+	const backToMainButton = document.getElementById('backToMainButton');
+	const exportTxtButton = document.getElementById('exportTxtButton');
 
-	const saveSettingsBtn = document.getElementById('saveSettingsBtn');
-	if (saveSettingsBtn) {
-		saveSettingsBtn.addEventListener('click', saveSettings);
-	}
+	let currentVideoId = '';
+	let currentVideoInfo = {};
+	let currentTabId = null;
 
-	const showSettingsBtn = document.getElementById('showSettingsBtn');
-	if (showSettingsBtn) {
-		showSettingsBtn.addEventListener('click', toggleSettings);
-	}
+	// 獲取當前標籤頁的 YouTube 視頻信息
+	function getVideoInfo() {
+		chrome.runtime.sendMessage({ action: "getCurrentTabInfo" }, function (response) {
+			if (response && response.videoId) {
+				currentVideoId = response.videoId;
+				currentTabId = response.tabId;
 
-	let currentMark = null; // 確保在使用之前初始化
-
-	// 定義 applySettings 函數
-	function applySettings() {
-		const buttonColor = document.getElementById('buttonColorInput').value;
-		const panelColor = document.getElementById('panelColorInput').value;
-		const panelOpacity = document.getElementById('panelOpacityInput').value;
-		const bodyTextColor = document.getElementById('bodyTextColorInput').value;
-
-		// 更新插件視窗的 body 顏色
-		document.body.style.backgroundColor = panelColor; // 更新 body 背景顏色
-		document.body.style.color = bodyTextColor; // 更新 body 文字顏色
-		document.body.style.opacity = panelOpacity; // 更新 body 透明度
-	}
-
-	function updateCurrentStream() {
-		chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-			if (tabs.length > 0) {
-				chrome.tabs.sendMessage(tabs[0].id, { action: "getStreamInfo" }, function (response) {
-					if (chrome.runtime.lastError) {
-						console.error(chrome.runtime.lastError);
-						return;
-					}
-					if (response) {
-						document.getElementById('streamTitle').textContent = response.streamTitle;
-						document.getElementById('youtuberName').textContent = response.youtuberName;
+				// 從 content script 獲取視頻信息
+				chrome.tabs.sendMessage(currentTabId, { action: "getVideoInfo" }, function (response) {
+					if (response && response.title) {
+						currentVideoInfo = response;
+						updateVideoInfo();
+						updateMarkedTimesList();
+					} else {
+						// 如果獲取失敗，5秒後重試
+						setTimeout(getVideoInfo, 5000);
 					}
 				});
 			}
 		});
 	}
 
-	function markCurrentTime() {
-		chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-			chrome.tabs.sendMessage(tabs[0].id, { action: "getCurrentTime" }, function (response) {
+	getVideoInfo(); // 調用獲取視頻信息的函數
+
+	function updateVideoInfo() {
+		videoInfo.innerHTML = `
+      <h2>${currentVideoInfo.title}</h2>
+      <p>直播主：${currentVideoInfo.channelName} (ID: ${currentVideoInfo.channelId})</p>
+    `;
+	}
+
+	// 標記時間
+	markTimeButton.addEventListener('click', function () {
+		if (currentVideoId && currentTabId) {
+			chrome.tabs.sendMessage(currentTabId, { action: "getCurrentTime" }, function (response) {
 				if (response) {
-					currentMark = {
-						time: Math.floor(response.currentTime),
-						description: '', // 這裡不需要清空描述
-						timestamp: new Date().toISOString()
-					};
-					chrome.runtime.sendMessage({ action: "saveTimelineMark", data: currentMark }, function () {
-						loadTimelineMarks(); // 重新加載標記
-					});
+					const timestamp = response.currentTime;
+					const formattedTime = response.formattedTime;
+					const description = descriptionInput.value;
+					saveTimeMarker(timestamp, formattedTime, description);
+					descriptionInput.value = '';
 				}
 			});
-		});
-	}
+		}
+	});
 
-	function loadTimelineMarks() {
-		chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-			chrome.runtime.sendMessage({ action: "getTimelineMarks", tabId: tabs[0].id }, function (marks) {
-				const marksContainer = document.getElementById('timelineMarks');
-				marksContainer.innerHTML = '';
-				marks.forEach((mark, index) => {
-					const row = document.createElement('tr');
-					row.innerHTML = `
-						<td class="time-cell">${formatTime(mark.time)}</td>
-						<td><input type="text" class="form-control description-input" value="${mark.description}" data-index="${index}"></td>
-						<td><button class="btn btn-sm btn-danger delete-mark" data-index="${index}">X</button></td>
-					`;
-					marksContainer.appendChild(row);
-				});
-				document.querySelectorAll('.delete-mark').forEach(button => {
-					button.addEventListener('click', function () {
-						deleteMark(this.getAttribute('data-index'));
-					});
-				});
-				document.querySelectorAll('.description-input').forEach(input => {
-					input.addEventListener('blur', function () { // 使用 blur 事件來保存描述
-						const index = this.getAttribute('data-index');
-						const newDescription = this.value;
-						updateDescription(index, newDescription);
-					});
-				});
+	// 保存時間標記
+	function saveTimeMarker(timestamp, formattedTime, description) {
+		chrome.storage.local.get({ timeMarkers: {} }, function (result) {
+			if (!result.timeMarkers[currentVideoInfo.channelUrl]) {
+				result.timeMarkers[currentVideoInfo.channelUrl] = {};
+			}
+			if (!result.timeMarkers[currentVideoInfo.channelUrl][currentVideoInfo.channelName]) {
+				result.timeMarkers[currentVideoInfo.channelUrl][currentVideoInfo.channelName] = {};
+			}
+			if (!result.timeMarkers[currentVideoInfo.channelUrl][currentVideoInfo.channelName][currentVideoInfo.title]) {
+				result.timeMarkers[currentVideoInfo.channelUrl][currentVideoInfo.channelName][currentVideoInfo.title] = [];
+			}
+			result.timeMarkers[currentVideoInfo.channelUrl][currentVideoInfo.channelName][currentVideoInfo.title].push({
+				formattedTime: formattedTime,
+				description: description,
+				timestamp: timestamp
+			});
+			chrome.storage.local.set({ timeMarkers: result.timeMarkers }, function () {
+				console.log('Time marker saved');
+				updateMarkedTimesList();
 			});
 		});
 	}
 
-	function deleteMark(index) {
-		chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-			chrome.runtime.sendMessage({ action: "deleteTimelineMark", tabId: tabs[0].id, index: parseInt(index) }, function () {
-				loadTimelineMarks();
+	// 更新標記列表
+	function updateMarkedTimesList() {
+		chrome.storage.local.get({ timeMarkers: {} }, function (result) {
+			const markers = result.timeMarkers[currentVideoInfo.channelUrl]?.[currentVideoInfo.channelName]?.[currentVideoInfo.title] || [];
+			markedTimesList.innerHTML = '';
+
+			markers.forEach((marker, index) => {
+				const markerElement = document.createElement('div');
+				markerElement.innerHTML = `
+          <span class="time">${marker.formattedTime}</span>
+          <input type="text" class="description" value="${marker.description}" data-index="${index}">
+          <button class="deleteButton" data-index="${index}">刪除</button>
+        `;
+				markedTimesList.appendChild(markerElement);
+			});
+			addMarkerListeners();
+
+			markedTimesList.scrollTop = markedTimesList.scrollHeight;
+		});
+	}
+
+	// 添加標記列表的事件監聽器
+	function addMarkerListeners() {
+		const descriptionInputs = document.querySelectorAll('.description');
+		const deleteButtons = document.querySelectorAll('.deleteButton');
+
+		descriptionInputs.forEach(input => {
+			input.addEventListener('change', function () {
+				const index = this.getAttribute('data-index');
+				editMarker(index, this.value);
+			});
+		});
+
+		deleteButtons.forEach(button => {
+			button.addEventListener('click', function () {
+				const index = this.getAttribute('data-index');
+				deleteMarker(index);
 			});
 		});
 	}
 
-	function updateDescription(index, newDescription) {
-		chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-			chrome.runtime.sendMessage({ action: "updateTimelineMark", tabId: tabs[0].id, index: parseInt(index), description: newDescription }, function () {
-				loadTimelineMarks();
+	// 編輯標記
+	function editMarker(index, newDescription) {
+		chrome.storage.local.get({ timeMarkers: {} }, function (result) {
+			const markers = result.timeMarkers[currentVideoInfo.channelUrl][currentVideoInfo.channelName][currentVideoInfo.title];
+			markers[index].description = newDescription;
+			chrome.storage.local.set({ timeMarkers: result.timeMarkers }, function () {
+				updateMarkedTimesList();
 			});
 		});
 	}
 
-	function formatTime(seconds) {
-		const date = new Date(null);
-		date.setSeconds(seconds);
-		return date.toISOString().substr(11, 8);
+	// 刪除標記
+	function deleteMarker(index) {
+		if (confirm("確定要刪除這個標記嗎？")) {
+			chrome.storage.local.get({ timeMarkers: {} }, function (result) {
+				result.timeMarkers[currentVideoInfo.channelUrl][currentVideoInfo.channelName][currentVideoInfo.title].splice(index, 1);
+				chrome.storage.local.set({ timeMarkers: result.timeMarkers }, function () {
+					updateMarkedTimesList();
+				});
+			});
+		}
 	}
 
-	function exportRecords() {
-		chrome.storage.local.get('timelineMarks', function (result) {
-			const dataStr = JSON.stringify(result.timelineMarks);
+	// 設置按鈕
+	settingsButton.addEventListener('click', function () {
+		document.getElementById('app').style.display = 'none';
+		settingsPanel.style.display = 'block';
+	});
+
+	// 返回主界面按鈕
+	backToMainButton.addEventListener('click', function () {
+		settingsPanel.style.display = 'none';
+		document.getElementById('app').style.display = 'block';
+	});
+
+	// 導出記錄
+	exportButton.addEventListener('click', function () {
+		chrome.storage.local.get({ timeMarkers: {} }, function (result) {
+			const dataStr = JSON.stringify(result.timeMarkers);
 			const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-			const exportFileDefaultName = 'youtube_timeline_marks.json';
+			const exportFileDefaultName = 'youtube_time_markers.json';
 
 			const linkElement = document.createElement('a');
 			linkElement.setAttribute('href', dataUri);
 			linkElement.setAttribute('download', exportFileDefaultName);
 			linkElement.click();
 		});
-	}
+	});
 
-	function importRecords(event) {
+	// 導入記錄
+	importButton.addEventListener('click', function () {
+		importInput.click();
+	});
+
+	importInput.addEventListener('change', function (event) {
 		const file = event.target.files[0];
-		const reader = new FileReader();
-		reader.onload = function (e) {
-			const contents = e.target.result;
-			try {
-				const importedData = JSON.parse(contents);
-				chrome.storage.local.set({ timelineMarks: importedData }, function () {
-					loadTimelineMarks();
-					alert('導入成功！');
+		if (file) {
+			const reader = new FileReader();
+			reader.onload = function (e) {
+				try {
+					const importedData = JSON.parse(e.target.result);
+					chrome.storage.local.set({ timeMarkers: importedData }, function () {
+						alert("記錄導入成功！");
+						updateMarkedTimesList();
+					});
+				} catch (error) {
+					alert("導入失敗，請確保文件格式正確。");
+				}
+			};
+			reader.readAsText(file);
+		}
+	});
+
+	// 切換主題
+	toggleThemeButton.addEventListener('click', function () {
+		document.body.classList.toggle('dark-mode');
+		chrome.storage.local.get({ darkMode: false }, function (result) {
+			chrome.storage.local.set({ darkMode: !result.darkMode });
+		});
+	});
+
+	// 初始化主題
+	chrome.storage.local.get({ darkMode: false }, function (result) {
+		if (result.darkMode) {
+			document.body.classList.add('dark-mode');
+		}
+	});
+
+	// 添加 TXT 導出功能
+	exportTxtButton.addEventListener('click', function () {
+		chrome.storage.local.get({ timeMarkers: {} }, function (result) {
+			let txtContent = '';
+			const channelMarkers = result.timeMarkers[currentVideoInfo.channelUrl]?.[currentVideoInfo.channelName] || {};
+
+			for (const title in channelMarkers) {
+				txtContent += title + '\n';
+				channelMarkers[title].forEach(marker => {
+					txtContent += `\t${marker.formattedTime} - ${marker.description}\n`;
 				});
-			} catch (error) {
-				alert('導入失敗，請確保文件格式正確。');
+				txtContent += '\n';
 			}
-		};
-		reader.readAsText(file);
-	}
 
-	function loadSettings() {
-		chrome.storage.local.get(['buttonColor', 'panelColor', 'panelOpacity', 'bodyTextColor'], function (result) {
-			if (result.buttonColor) {
-				document.getElementById('buttonColorInput').value = result.buttonColor;
-			}
-			if (result.panelColor) {
-				document.getElementById('panelColorInput').value = result.panelColor;
-			}
-			if (result.panelOpacity) {
-				document.getElementById('panelOpacityInput').value = result.panelOpacity;
-			}
-			if (result.bodyTextColor) {
-				document.getElementById('bodyTextColorInput').value = result.bodyTextColor;
-			}
+			const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
+			const url = URL.createObjectURL(blob);
+			const link = document.createElement('a');
+			link.href = url;
+			link.download = 'youtube_timestamps.txt';
+			link.click();
+			URL.revokeObjectURL(url);
 		});
-	}
-
-	function saveSettings() {
-		const buttonColor = document.getElementById('buttonColorInput').value;
-		const panelColor = document.getElementById('panelColorInput').value;
-		const panelOpacity = document.getElementById('panelOpacityInput').value;
-		const bodyTextColor = document.getElementById('bodyTextColorInput').value;
-
-		chrome.storage.local.set({
-			buttonColor,
-			panelColor,
-			panelOpacity,
-			bodyTextColor
-		}, function () {
-			applySettings(); // 即時應用設定
-		});
-	}
-
-	function toggleSettings() {
-		const settingsDiv = document.getElementById('settings');
-		settingsDiv.style.display = settingsDiv.style.display === 'none' ? 'block' : 'none';
-	}
+	});
 });
-
-// 定義 applySettings 函數
-function applySettings() {
-	const buttonColor = document.getElementById('buttonColorInput').value;
-	const panelColor = document.getElementById('panelColorInput').value;
-	const panelOpacity = document.getElementById('panelOpacityInput').value;
-	const bodyTextColor = document.getElementById('bodyTextColorInput').value;
-
-	// 更新插件視窗的 body 顏色
-	document.body.style.backgroundColor = panelColor; // 更新 body 背景顏色
-	document.body.style.color = bodyTextColor; // 更新 body 文字顏色
-	document.body.style.opacity = panelOpacity; // 更新 body 透明度
-}
-
-function applyDefaultColors() {
-	document.getElementById('buttonColorInput').value = '#007bff'; // 預設按鈕顏色
-	document.getElementById('panelColorInput').value = '#ffffff'; // 預設面板顏色
-	document.getElementById('bodyTextColorInput').value = '#000000'; // 預設文字顏色
-	applySettings(); // 應用設定
-}
-
-function applyDarkColors() {
-	document.getElementById('buttonColorInput').value = '#ffffff'; // 深色按鈕顏色
-	document.getElementById('panelColorInput').value = '#333333'; // 深色面板顏色
-	document.getElementById('bodyTextColorInput').value = '#ffffff'; // 深色文字顏色
-	applySettings(); // 應用設定
-}
-
-function applyLightColors() {
-	document.getElementById('buttonColorInput').value = '#000000'; // 淺色按鈕顏色
-	document.getElementById('panelColorInput').value = '#f8f9fa'; // 淺色面板顏色
-	document.getElementById('bodyTextColorInput').value = '#000000'; // 淺色文字顏色
-	applySettings(); // 應用設定
-}
-
-// 導出當前直播的 TXT 文件
-function exportCurrentLive() {
-	chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-		chrome.tabs.sendMessage(tabs[0].id, { action: "getStreamInfo" }, function (response) {
-			if (response) {
-				const liveInfo = `當前直播：${response.streamTitle}\n主播：${response.youtuberName}`;
-				const blob = new Blob([liveInfo], { type: 'text/plain' });
-				const url = URL.createObjectURL(blob);
-				const a = document.createElement('a');
-				a.href = url;
-				a.download = 'current_live_info.txt';
-				document.body.appendChild(a);
-				a.click();
-				document.body.removeChild(a);
-				URL.revokeObjectURL(url);
-			}
-		});
-	});
-}
-
-// 清除歷史資料
-function clearHistory() {
-	chrome.storage.local.set({ timelineMarks: {} }, function () {
-		alert('歷史資料已清除！');
-		loadTimelineMarks(); // 重新加載標記
-	});
-}

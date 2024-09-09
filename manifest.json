@@ -2,15 +2,18 @@
 	"manifest_version": 3,
 	"name": "YouTube 直播時間軸標記",
 	"version": "1.0",
-	"description": "為 YouTube 直播添加時間軸標記和描述",
+	"description": "在 YouTube 直播中標記時間軸並添加描述",
 	"permissions": ["storage", "tabs", "activeTab"],
 	"host_permissions": ["https://www.youtube.com/*"],
 	"action": {
 		"default_icon": {
 			"16": "images/icon16.png",
-			"32": "images/icon32.png",
+			"48": "images/icon48.png",
 			"128": "images/icon128.png"
 		}
+	},
+	"background": {
+		"service_worker": "background.js"
 	},
 	"content_scripts": [
 		{
@@ -19,12 +22,9 @@
 			"css": ["content.css"]
 		}
 	],
-	"background": {
-		"service_worker": "background.js"
-	},
 	"web_accessible_resources": [
 		{
-			"resources": ["popup.html", "styles.css"],
+			"resources": ["popup.html", "popup.js", "popup.css"],
 			"matches": ["https://www.youtube.com/*"]
 		}
 	]
