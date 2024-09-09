@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	const toggleThemeButton = document.getElementById('toggleThemeButton');
 	const backToMainButton = document.getElementById('backToMainButton');
 	const exportTxtButton = document.getElementById('exportTxtButton');
+	const clearHistoryButton = document.getElementById('clearHistoryButton');
 
 	let currentVideoId = '';
 	let currentVideoInfo = {};
@@ -46,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	function updateVideoInfo() {
 		videoInfo.innerHTML = `
       <h2>${currentVideoInfo.title}</h2>
-      <h3>直播主：${currentVideoInfo.channelName} (ID: ${currentVideoInfo.channelId})</p>
+      <h3>直播主：${currentVideoInfo.channelName} (ID: ${currentVideoInfo.channelId})</h3>
     `;
 	}
 
@@ -107,7 +108,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			if (markers.length === 0) {
 				markedTimesList.innerHTML = '<p>暫無標記</p>';
+				markedTimesList.style.display = 'none'; // 隱藏標記列表
 			} else {
+				markedTimesList.style.display = 'block'; // 顯示標記列表
 				markers.forEach((marker, index) => {
 					const markerElement = document.createElement('div');
 					markerElement.innerHTML = `
@@ -120,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			}
 			addMarkerListeners();
 
-			markedTimesList.scrollTop = markedTimesList.scrollHeight;
+			markedTimesList.scrollTop = markedTimesList.scrollHeight; // 滾動到最新標記
 		});
 	}
 
@@ -179,17 +182,22 @@ document.addEventListener('DOMContentLoaded', function () {
 		document.getElementById('app').style.display = 'block';
 	});
 
-	// 導出記錄
+	// 導出 JSON 記錄
 	exportButton.addEventListener('click', function () {
 		chrome.storage.local.get({ timeMarkers: {} }, function (result) {
-			const dataStr = JSON.stringify(result.timeMarkers);
-			const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-			const exportFileDefaultName = 'youtube_time_markers.json';
-
-			const linkElement = document.createElement('a');
-			linkElement.setAttribute('href', dataUri);
-			linkElement.setAttribute('download', exportFileDefaultName);
-			linkElement.click();
+			const dataStr = JSON.stringify(result.timeMarkers, null, 2); // 使用縮進來格式化 JSON
+			const blob = new Blob([dataStr], { type: 'application/json' });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.style.display = 'none';
+			a.href = url;
+			a.download = 'youtube_time_markers.json';
+			document.body.appendChild(a);
+			a.click();
+			setTimeout(function () {
+				document.body.removeChild(a);
+				window.URL.revokeObjectURL(url);
+			}, 100);
 		});
 	});
 
@@ -236,30 +244,36 @@ document.addEventListener('DOMContentLoaded', function () {
 	exportTxtButton.addEventListener('click', function () {
 		chrome.storage.local.get({ timeMarkers: {} }, function (result) {
 			let txtContent = '';
-			const channelMarkers = result.timeMarkers[currentVideoInfo.channelUrl]?.[currentVideoInfo.channelName] || {};
+			const currentMarkers = result.timeMarkers[currentVideoInfo.channelUrl]?.[currentVideoInfo.channelName]?.[currentVideoInfo.title];
 
-			for (const title in channelMarkers) {
-				txtContent += title + '\n';
-				txtContent += `URL: ${channelMarkers[title].url}\n`;
-				channelMarkers[title].markers.forEach(marker => {
-					txtContent += `\t${marker.formattedTime} - ${marker.description}\n`;
+			if (currentMarkers) {
+				txtContent += `標題: ${currentVideoInfo.title}\n`;
+				txtContent += `頻道: ${currentVideoInfo.channelName}\n`;
+				txtContent += `URL: ${currentMarkers.url}\n`;
+				txtContent += '時間標記:\n';
+				currentMarkers.markers.forEach(marker => {
+					txtContent += `  ${marker.formattedTime} - ${marker.description}\n`;
 				});
-				txtContent += '\n';
+			} else {
+				txtContent = '當前頁面沒有時間標記。';
 			}
 
 			const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
 			const url = URL.createObjectURL(blob);
-			const link = document.createElement('a');
-			link.href = url;
-			link.download = 'youtube_timestamps.txt';
-			link.click();
-			URL.revokeObjectURL(url);
+			const a = document.createElement('a');
+			a.style.display = 'none';
+			a.href = url;
+			a.download = 'youtube_timestamps.txt';
+			document.body.appendChild(a);
+			a.click();
+			setTimeout(function () {
+				document.body.removeChild(a);
+				window.URL.revokeObjectURL(url);
+			}, 100);
 		});
 	});
 
 	// 清除歷史記錄
-	const clearHistoryButton = document.getElementById('clearHistoryButton');
-
 	clearHistoryButton.addEventListener('click', function () {
 		if (confirm("確定要清除所有歷史記錄嗎？此操作不可撤銷。")) {
 			chrome.storage.local.set({ timeMarkers: {} }, function () {
