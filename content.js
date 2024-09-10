@@ -79,11 +79,41 @@ function createButton() {
 	popup.src = chrome.runtime.getURL('popup.html');
 	document.body.appendChild(popup);
 
-	button.addEventListener('click', () => {
-		popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
-	});
+	button.addEventListener('click', togglePopup);
+
+	// 監聽影片連結點擊
+	document.addEventListener('click', function (e) {
+		if (e.target.tagName === 'A' && e.target.href.includes('youtube.com/watch')) {
+			hidePopup();
+		}
+	}, true);
 
 	console.log('Button created'); // 添加日誌
+}
+
+function togglePopup() {
+	const popup = document.getElementById('yt-timestamp-popup');
+	const button = document.getElementById('yt-timestamp-button');
+	if (popup.style.display === 'none') {
+		showPopup();
+	} else {
+		hidePopup();
+	}
+}
+
+function showPopup() {
+	const popup = document.getElementById('yt-timestamp-popup');
+	const button = document.getElementById('yt-timestamp-button');
+	popup.style.display = 'block';
+	button.textContent = '收起';
+	popup.contentWindow.postMessage({ action: 'refreshVideoInfo' }, '*');
+}
+
+function hidePopup() {
+	const popup = document.getElementById('yt-timestamp-popup');
+	const button = document.getElementById('yt-timestamp-button');
+	popup.style.display = 'none';
+	button.textContent = '時間軸';
 }
 
 // 當頁面加載完成時創建按鈕
@@ -123,5 +153,6 @@ new MutationObserver(() => {
 		lastUrl = url;
 		console.log('URL changed, reinitializing extension'); // 添加日誌
 		initializeExtension();
+		hidePopup(); // 在 URL 變化時隱藏彈出窗口
 	}
 }).observe(document, { subtree: true, childList: true });

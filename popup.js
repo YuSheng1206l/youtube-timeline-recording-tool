@@ -282,4 +282,11 @@ document.addEventListener('DOMContentLoaded', function () {
 			});
 		}
 	});
+
+	// 添加消息監聽器
+	window.addEventListener('message', function (event) {
+		if (event.data.action === 'refreshVideoInfo') {
+			getVideoInfo();
+		}
+	});
 });
