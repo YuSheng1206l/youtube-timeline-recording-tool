@@ -43,14 +43,20 @@ button {
 	background-color: var(--primary-color);
 	color: white;
 	border: none;
-	padding: 10px 15px;
-	/* 調整按鈕內邊距 */
+	padding: 10px;
+	/* 將內邊距統一設置為 10px */
 	border-radius: 5px;
 	cursor: pointer;
 	transition: all 0.3s ease;
 	font-weight: 500;
 	font-size: 14px;
 	margin-bottom: 10px;
+	display: flex;
+	/* 使用 flex 布局 */
+	align-items: center;
+	/* 垂直居中對齊 */
+	justify-content: center;
+	/* 水平居中對齊 */
 }
 
 button:hover {
@@ -102,11 +108,19 @@ input[type="text"]:focus {
 .input-group {
 	display: flex;
 	margin-bottom: 20px;
+	align-items: stretch;
+	/* 改為 stretch */
 }
 
 .input-group input {
 	flex-grow: 1;
 	margin-right: 10px;
+	height: 40px;
+	box-sizing: border-box;
+	display: flex;
+	/* 添加 */
+	align-items: center;
+	/* 添加 */
 }
 
 #markedTimesList {
@@ -177,6 +191,8 @@ input[type="text"]:focus {
 .button-group button {
 	flex: 1;
 	margin: 0 5px;
+	height: 40px;
+	/* 統一按鈕高度 */
 }
 
 #settingsPanel {
@@ -221,4 +237,45 @@ input[type="text"]:focus {
 
 footer {
 	margin-top: auto;
+}
+
+/* 修改現有的 button 樣式 */
+#markTimeButton {
+	width: 40px;
+	height: 40px;
+	padding: 0;
+	font-size: 18px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	/* 防止按鈕被壓縮 */
+}
+
+#markTimeButton i {
+	margin: 0;
+	padding: 0;
+}
+
+#markTimeButtonFooter {
+	width: 40px;
+	height: 40px;
+	padding: 0;
+	font-size: 18px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	/* 防止按鈕被壓縮 */
+}
+
+#markTimeButtonFooter i {
+	margin: 0;
+	padding: 0;
+}
+
+/* 新增樣式，使最後一個按鈕（新的標記時間按鈕）寬度更小 */
+.button-group button:last-child {
+	flex: 0 0 40px;
+	/* 不伸縮，固定寬度 40px */
 }
