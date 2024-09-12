@@ -1,35 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 
 <head>
 	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>YouTube 直播時間軸標記</title>
 	<link rel="stylesheet" href="popup.css">
 	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
 </head>
 
 <body>
 	<div id="app">
-		<h1>YouTube 直播時間軸標記</h1>
-		<div id="videoInfo"></div>
-		<div class="input-group">
-			<input type="text" id="descriptionInput" placeholder="添加描述...">
-			<button id="markTimeButton">標記時間</button>
-		</div>
-		<div id="markedTimesList"></div>
-		<div class="button-group">
-			<button id="exportTxtButton">導出TXT</button>
-			<button id="settingsButton">設置</button>
-		</div>
+		<header>
+			<h1>YouTube 直播時間軸標記</h1>
+		</header>
+		<main>
+			<div id="videoInfo" class="card"></div>
+			<div class="input-group">
+				<input type="text" id="descriptionInput" placeholder="添加描述...">
+				<button id="markTimeButton" class="primary-button">
+					<i class="fas fa-bookmark"></i> 標記時間
+				</button>
+			</div>
+			<div id="markedTimesList" class="card"></div>
+		</main>
+		<footer>
+			<div class="button-group">
+				<button id="exportTxtButton" class="secondary-button">
+					<i class="fas fa-file-export"></i> 導出TXT
+				</button>
+				<button id="settingsButton" class="secondary-button">
+					<i class="fas fa-cog"></i> 設置
+				</button>
+
+			</div>
+		</footer>
 	</div>
-	<div id="settingsPanel" style="display: none;">
-		<h2>設置</h2>
-		<button id="exportButton">導出JSON</button>
-		<button id="importButton">導入記錄</button>
-		<input type="file" id="importInput" accept=".json" style="display: none;">
-		<button id="toggleThemeButton">切換主題</button>
-		<button id="clearHistoryButton">清除歷史記錄</button>
-		<button id="backToMainButton">返回主界面</button>
+	<div id="settingsPanel" class="modal" style="display: none;">
+		<div class="modal-content">
+			<h2>設置</h2>
+			<button id="exportButton" class="secondary-button"><i class="fas fa-file-export"></i> 導出JSON</button>
+			<button id="importButton" class="secondary-button"><i class="fas fa-file-import"></i> 導入記錄</button>
+			<input type="file" id="importInput" accept=".json" style="display: none;">
+			<button id="toggleThemeButton" class="secondary-button"><i class="fas fa-adjust"></i> 切換主題</button>
+			<button id="clearHistoryButton" class="danger-button"><i class="fas fa-trash-alt"></i> 清除歷史記錄</button>
+			<button id="backToMainButton" class="primary-button"><i class="fas fa-arrow-left"></i> 返回主界面</button>
+		</div>
 	</div>
 	<script src="popup.js"></script>
 </body>

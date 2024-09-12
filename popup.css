@@ -171,6 +171,12 @@ input[type="text"]:focus {
 .button-group {
 	display: flex;
 	justify-content: space-between;
+	margin-top: 20px;
+}
+
+.button-group button {
+	flex: 1;
+	margin: 0 5px;
 }
 
 #settingsPanel {
@@ -211,4 +217,8 @@ input[type="text"]:focus {
 
 ::-webkit-scrollbar-thumb:hover {
 	background: var(--secondary-color);
+}
+
+footer {
+	margin-top: auto;
 }
